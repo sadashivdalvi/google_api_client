@@ -118,7 +118,7 @@ function _google_api_client_read_scope_info() {
 
   $scopes = array();
   $classes = array();
-  $client = \Drupal::service('google_api_client.client')->getClient();
+  $client = \Drupal::service('google_api_client.client')->getClient(TRUE);
   foreach (get_declared_classes() as $class) {
     if (is_subclass_of($class, 'Google_Service')) {
       $temp = new ReflectionClass($class);

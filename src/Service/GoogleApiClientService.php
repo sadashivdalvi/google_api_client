@@ -79,14 +79,19 @@ class GoogleApiClientService {
    * Developers can pass the google_api_client object to setGoogleApiClient
    * and get the api client ready for operations.
    *
+   * @param bool $blank
+   *   If some resource wants a blank object with basic details set.
+   *
    * @return \Google_Client
    *   Google_Client object with all params from the account.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function getClient() {
+  public function getClient($blank = FALSE) {
     google_api_client_load_library();
     $client = new Google_Client();
     $client->setRedirectUri(google_api_client_callback_url());
-    if ($this->googleApiClient == NULL) {
+    if ($this->googleApiClient == NULL || $blank) {
       return $client;
     }
     $google_api_client = $this->googleApiClient;
@@ -209,10 +214,13 @@ class GoogleApiClientService {
    * So if the account is authenticated for say Google calendar then
    * this function will return Google_Service_Calendar class object.
    *
+   * @param bool $blank_client
+   *   If we should use a blank client object.
+   * @param bool $return_object
+   *   True if we want objects else classes returned.
+   *
    * @return array
    *   Array of Google_Service classes with servicename as index.
-   *
-   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function getServiceObjects($blank_client = FALSE, $return_object = TRUE) {
     $google_api_client = $this->googleApiClient;

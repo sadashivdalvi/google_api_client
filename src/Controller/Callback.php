@@ -78,9 +78,8 @@ class Callback extends ControllerBase {
     }
     if ($account_id) {
       $google_api_client = \Drupal::entityTypeManager()->getStorage($entity_type)->load($account_id);
-      $service = \Drupal::service('google_api_client.client');
-      $service->setGoogleApiClient($google_api_client);
-      $client = $service->getClient();
+      $this->googleApiClient->setGoogleApiClient($google_api_client);
+      $client = $this->googleApiClient->getClient();
       $client->setApplicationName("Google OAuth2");
 
       if ($request->get('code')) {

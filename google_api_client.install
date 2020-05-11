@@ -40,6 +40,7 @@ function google_api_client_update_8001() {
 
   //Let's find services for these scopes.
   $all_services = _google_api_client_google_services_names();
+  $all_services = array_keys($all_services);
   $all_scopes = google_api_client_google_services_scopes($all_services);
   $services = [];
   foreach ($scopes as $scope) {
@@ -51,16 +52,20 @@ function google_api_client_update_8001() {
     }
   }
   $services = array_unique($services);
-  $token = \Drupal::config('google_api_client.tokens')->get('google_access_token');
+  $token = unserialize(\Drupal::config('google_api_client.tokens')->get('google_access_token'));
+  $token = \Drupal\Component\Serialization\Json::encode($token);
   $account = [
+    'name' => 'Google Api Client',
     'client_id' => $settings['web']['client_id'],
     'client_secret' => $settings['web']['client_secret'],
     'access_token' => $token,
     'services' => $services,
-    'is_authenticated' => 1,
     'access_type' => 1,
   ];
   $google_api_client = \Drupal::entityTypeManager()->getStorage('google_api_client')->create($account);
+  if ($token) {
+    $google_api_client->setAuthenticated(TRUE);
+  }
   $google_api_client->setScopes($scopes);
   $google_api_client->save();
 
