@@ -79,12 +79,11 @@ class Callback extends ControllerBase {
     if ($account_id) {
       $google_api_client = \Drupal::entityTypeManager()->getStorage($entity_type)->load($account_id);
       $this->googleApiClient->setGoogleApiClient($google_api_client);
-      $client = $this->googleApiClient->getClient();
-      $client->setApplicationName("Google OAuth2");
+      $this->googleApiClient->googleClient->setApplicationName("Google OAuth2");
 
       if ($request->get('code')) {
-        $client->fetchAccessTokenWithAuthCode($request->get('code'));
-        $google_api_client->setAccessToken(json_encode($client->getAccessToken()));
+        $this->googleApiClient->googleClient->fetchAccessTokenWithAuthCode($request->get('code'));
+        $google_api_client->setAccessToken(json_encode($this->googleApiClient->googleClient->getAccessToken()));
         $google_api_client->setAuthenticated(TRUE);
         $google_api_client->save();
         unset($_SESSION['google_api_client_account_id']);
@@ -92,8 +91,8 @@ class Callback extends ControllerBase {
         \Drupal::messenger()->addMessage(t('Api Account saved'));
         return $response;
       }
-      if ($client) {
-        $auth_url = $client->createAuthUrl();
+      if ($this->googleApiClient->googleClient) {
+        $auth_url = $this->googleApiClient->googleClient->createAuthUrl();
         $response = new TrustedRedirectResponse($auth_url);
         $response->send();
       }

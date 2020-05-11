@@ -6,7 +6,6 @@ use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Drupal\google_api_client\Entity\GoogleApiClient;
 
 /**
  * Provides a form for revoking a google_api_client entity.
@@ -48,8 +47,9 @@ class GoogleApiClientRevokeForm extends ContentEntityConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $google_api_client = $this->entity;
-    $client = GoogleApiClient::getGoogleApiClientClient($google_api_client);
-    $client->revokeToken();
+    $service = \Drupal::service('google_api_client.client');
+    $service->setGoogleApiClient($google_api_client);
+    $service->googleClient->revokeToken();
     $google_api_client->setAccessToken('{}');
     $google_api_client->setAuthenticated(FALSE);
     $google_api_client->save();

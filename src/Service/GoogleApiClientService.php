@@ -19,14 +19,14 @@ class GoogleApiClientService {
    *
    * @var \Google_Client
    */
-  protected $googleClient;
+  public $googleClient;
 
   /**
    * The GoogleApiClient Entity Object.
    *
    * @var \Drupal\google_api_client\GoogleApiClientInterface
    */
-  protected $googleApiClient;
+  public $googleApiClient;
 
   /**
    * The logger factory.
@@ -54,7 +54,6 @@ class GoogleApiClientService {
                               CacheBackendInterface $cacheBackend) {
     $this->loggerFactory = $loggerFactory;
     $this->cacheBackend = $cacheBackend;
-
   }
 
   /**
@@ -62,15 +61,13 @@ class GoogleApiClientService {
    *
    * @param \Drupal\google_api_client\GoogleApiClientInterface $google_api_client
    *   Pass completely loaded GoogleApiClient object.
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   public function setGoogleApiClient(GoogleApiClientInterface $google_api_client) {
     $this->googleApiClient = $google_api_client;
-    // Add the client without tokens.
-    $this->googleClient = $this->getClient();
-
-    // Check and add tokens.
-    // Tokens wont always be set or valid, so this is a 2 step process.
-    $this->setAccessToken();
+    // Add the client.
+    $this->getClient();
   }
 
   /**
@@ -79,26 +76,20 @@ class GoogleApiClientService {
    * Developers can pass the google_api_client object to setGoogleApiClient
    * and get the api client ready for operations.
    *
-   * @param bool $blank
-   *   If some resource wants a blank object with basic details set.
-   *
    * @return \Google_Client
    *   Google_Client object with all params from the account.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function getClient($blank = FALSE) {
+  private function getClient() {
     google_api_client_load_library();
     $client = new Google_Client();
     $client->setRedirectUri(google_api_client_callback_url());
-    if ($this->googleApiClient == NULL || $blank) {
+    if ($this->googleApiClient == NULL) {
       return $client;
     }
     $google_api_client = $this->googleApiClient;
     $client->setClientId($google_api_client->getClientId());
-    if ($google_api_client->getAuthenticated()) {
-      $client->setAccessToken($google_api_client->getAccessToken());
-    }
     if ($google_api_client->getAccessType()) {
       $client->setAccessType('offline');
     }
@@ -115,23 +106,9 @@ class GoogleApiClientService {
     $google_api_client_id = $google_api_client->getId();
     \Drupal::moduleHandler()->alter('google_api_client_account_scopes', $scopes, $google_api_client_id);
     $client->addScope($scopes);
+    $this->googleClient = $client;
 
-    if ($client->getAccessToken() && $client->isAccessTokenExpired()) {
-      if ($client->getRefreshToken() != '') {
-        // Access Type is Offline.
-        $client->refreshToken($client->getRefreshToken());
-        $token = $client->getAccessToken();
-        $google_api_client->setAccessToken($token);
-        $google_api_client->save();
-      }
-      else {
-        $client->revokeToken();
-        $google_api_client->setAuthenticated(FALSE);
-        $google_api_client->setAccessToken('');
-        $google_api_client->save();
-        \Drupal::messenger()->addMessage(t('Access token is expired. If you are admin then you need to authenticate again. Consider configuring access type to offline.'));
-      }
-    }
+    $this->setAccessToken();
     return $client;
   }
 
@@ -143,19 +120,14 @@ class GoogleApiClientService {
    *
    * @return array
    *   Token values array.
+   *
+   * @deprecated in google_api_client:8.x-2.0 and
+   * is removed from google_api_client:8.x-3.0.
+   *   Use Google_Client/fetchAccessTokenWithAuthCode()
+   *   Instead, you should just check googleClient object function.
    */
   public function getAccessTokenByAuthCode($code) {
-    $token = $this->googleClient->fetchAccessTokenWithAuthCode($code);
-    if (isset($token['access_token'])) {
-      $this->setTokenCache('google_access_token', $token);
-    }
-
-    // Refresh token is only set the first time.
-    if (isset($token['refresh_token'])) {
-      $this->setTokenCache('google_refresh_token', [$token['refresh_token']]);
-    }
-
-    return $token;
+    return $this->googleClient->fetchAccessTokenWithAuthCode($code);
   }
 
   /**
@@ -163,15 +135,16 @@ class GoogleApiClientService {
    *
    * @return array|bool
    *   token array or false.
+   *
+   * @deprecated in google_api_client:8.x-2.0
+   * and is removed from google_api_client:8.x-3.0.
+   *   Use Google_Client/fetchAccessTokenWithRefreshToken()
+   *   Instead, you should just check googleClient object function.
    */
   public function getAccessTokenWithRefreshToken() {
     if ($access_token = $this->googleApiClient->getAccessToken() && isset($access_token['refresh_token'])) {
-      $token = $this->googleClient->fetchAccessTokenWithRefreshToken($access_token['refresh_token']);
-      if (isset($token['access_token'])) {
-        return $token;
-      }
+      return $this->googleClient->fetchAccessTokenWithRefreshToken($access_token['refresh_token']);
     }
-
     return FALSE;
   }
 
@@ -180,31 +153,40 @@ class GoogleApiClientService {
    *
    * @return bool
    *   Was the token added or not?
+   *
+   * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function setAccessToken() {
     // If there was something in cache.
     if ($access_token = $this->googleApiClient->getAccessToken()) {
-      $this->googleClient->setAccessToken($access_token);
-
-      // Check if the current cached token is expired?
+      // Check if the current token is expired?
       if ($this->googleClient->isAccessTokenExpired()) {
-        // Refresh the access token using refresh token.
-        $tokenUpdated = $this->getAccessTokenWithRefreshToken();
-
-        // Now that there is a new access token in cache,
-        // set it into the client.
-        if ($tokenUpdated != FALSE) {
-          $this->googleClient->setAccessToken($tokenUpdated);
-          // There should be a new unexpired token.
-          return TRUE;
+        // Refresh the access token using refresh token if it is set.
+        if ($this->googleClient->getRefreshToken() != '') {
+          $tokenUpdated = $this->googleClient->fetchAccessTokenWithRefreshToken($this->googleClient->getRefreshToken());
+          // Now that there is a new access token in cache,
+          // set it into the client.
+          if ($tokenUpdated != FALSE) {
+            $this->googleClient->setAccessToken($tokenUpdated);
+            $this->googleApiClient->setAccessToken($tokenUpdated);
+            $this->googleApiClient->save();
+            // There should be a new unexpired token.
+            return TRUE;
+          }
         }
+        // Else the token fetch from refresh token failed.
+        $this->googleClient->revokeToken();
+        $this->googleApiClient->setAuthenticated(FALSE);
+        $this->googleApiClient->setAccessToken('{}');
+        $this->googleApiClient->save();
         // Unable to update token.
         return FALSE;
       }
+      $this->googleClient->setAccessToken($access_token);
       // Token is set and is valid.
       return TRUE;
     }
-    // There is no token cache.
+    // There is no token in db.
     return FALSE;
   }
 
@@ -231,23 +213,7 @@ class GoogleApiClientService {
     $classes = \Drupal::config('google_api_client.google_api_classes')->get('google_api_client_google_api_classes');
     $return = [];
     foreach ($services as $service) {
-      if ($blank_client) {
-        $client = new Google_Client();
-        if ($return_object) {
-          $return[$service] = new $classes[$service]($client);
-        }
-        else {
-          $return[$service] = $classes[$service];
-        }
-      }
-      else {
-        if ($return_object) {
-          $return[$service] = new $classes[$service]($this->googleClient);
-        }
-        else {
-          $return[$service] = $classes[$service];
-        }
-      }
+      $return[$service] = new $classes[$service]($this->googleClient);
     }
     return $return;
   }
