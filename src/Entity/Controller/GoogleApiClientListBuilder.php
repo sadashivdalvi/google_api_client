@@ -39,7 +39,7 @@ class GoogleApiClientListBuilder extends EntityListBuilder {
    * and inserts the 'edit' and 'delete' links as defined for the entity type.
    */
   public function buildHeader() {
-    $header = ['Id', 'Name', 'Services', 'Is Authenticated'];
+    $header = ['Id', 'Name', 'Services', 'Is Authenticated', 'Created By'];
     return $header + parent::buildHeader();
   }
 
@@ -54,6 +54,7 @@ class GoogleApiClientListBuilder extends EntityListBuilder {
       'Name' => $entity->getName(),
       'Services' => implode(", ", _google_api_client_google_services_names($entity->getServices())),
       'is_authenticated' => $entity->getAuthenticated() ? t('Yes') : t('No'),
+      'Created By' => $entity->getOwner()->toLink($entity->getOwner()->getAccountName()),
     ];
     return $row + parent::buildRow($entity);
   }

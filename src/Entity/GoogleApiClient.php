@@ -544,7 +544,6 @@ class GoogleApiClient extends ContentEntityBase implements GoogleApiClientInterf
         'uid' => \Drupal::currentUser()->id(),
       ];
     }
-    $values['is_authenticated'] = FALSE;
   }
 
   /**
