@@ -163,9 +163,11 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
   /**
    * Function sets id of the service account.
    *
-   * @param $id
+   * @param string $id
    *   Pass id of the service account.
+   *
    * @return bool
+   *   Returns true if the operation is successful.
    */
   public function setId($id) {
     return $this->id = $id;
@@ -173,9 +175,12 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
 
   /**
    * Function sets Name of the service account.
-   * @param $name
+   *
+   * @param string $name
    *   Pass the account name.
+   *
    * @return bool
+   *   Returns true if the operation is successful.
    */
   public function setName($name) {
     return $this->label = $name;
@@ -187,6 +192,7 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
   public function setAuthConfig($config) {
     return $this->auth_config = Json::encode($config);
   }
+
   /**
    * {@inheritdoc}
    */

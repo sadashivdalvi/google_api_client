@@ -24,6 +24,7 @@ interface GoogleApiServiceClientInterface extends ConfigEntityInterface {
    *
    * @param bool $url
    *   TRUE if should return scope urls.
+   *
    * @return array
    *   Returns array of scopes.
    */
