@@ -73,3 +73,12 @@ function google_api_client_update_8001() {
   \Drupal::configFactory()->getEditable('google_api_client.settings')->delete();
   \Drupal::configFactory()->getEditable('google_api_client.tokens')->delete();
 }
+
+/**
+ * Create Entity Type for Google Api Service Client.
+ */
+function google_api_client_update_8002() {
+  \Drupal::entityTypeManager()->clearCachedDefinitions();
+  $entity_type = \Drupal::entityTypeManager()->getDefinition('google_api_service_client');
+  \Drupal::entityDefinitionUpdateManager()->installEntityType($entity_type);
+}
