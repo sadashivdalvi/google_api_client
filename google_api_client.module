@@ -81,6 +81,7 @@ function _google_api_client_google_services_names($services = FALSE) {
     $names = \Drupal::config('google_api_client.google_api_services')->get('google_api_client_google_api_services');
   }
   if (!$services) {
+    asort($names);
     return $names;
   }
   else {
