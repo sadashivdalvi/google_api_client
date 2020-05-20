@@ -264,7 +264,7 @@ class GoogleApiClient extends ContentEntityBase implements GoogleApiClientInterf
   /**
    * {@inheritdoc}
    */
-  public function setScopes($scopes) {
+  public function setScopes(array $scopes) {
     $services = $this->getServices();
     $all_scopes = google_api_client_google_services_scopes($services);
     $merged_scopes = [];
@@ -282,7 +282,7 @@ class GoogleApiClient extends ContentEntityBase implements GoogleApiClientInterf
   /**
    * {@inheritdoc}
    */
-  public function setServices($services) {
+  public function setServices(array $services) {
     return $this->set('services', $services);
   }
 
