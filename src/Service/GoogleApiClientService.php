@@ -107,6 +107,7 @@ class GoogleApiClientService {
     \Drupal::moduleHandler()->alter('google_api_client_account_scopes', $scopes, $google_api_client_id);
     $client->addScope($scopes);
     $this->googleClient = $client;
+    $this->googleClient->setAccessToken($google_api_client->getAccessToken());
 
     $this->setAccessToken();
     return $client;
@@ -177,7 +178,7 @@ class GoogleApiClientService {
         // Else the token fetch from refresh token failed.
         $this->googleClient->revokeToken();
         $this->googleApiClient->setAuthenticated(FALSE);
-        $this->googleApiClient->setAccessToken('{}');
+        $this->googleApiClient->setAccessToken('');
         $this->googleApiClient->save();
         // Unable to update token.
         return FALSE;
