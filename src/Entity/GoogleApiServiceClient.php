@@ -35,6 +35,7 @@ use Drupal\Component\Serialization\Json;
  *     "id",
  *     "label",
  *     "auth_config",
+ *     "access_token",
  *     "services",
  *     "scopes"
  *   },
@@ -96,6 +97,13 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
   protected $auth_config;
 
   /**
+   * The access_token for account.
+   *
+   * @var string
+   */
+  protected $access_token;
+
+  /**
    * The services for account.
    *
    * @var array
@@ -128,6 +136,13 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
    */
   public function getAuthConfig() {
     return Json::decode($this->auth_config);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getAccessToken() {
+    return Json::decode($this->access_token);
   }
 
   /**
@@ -191,6 +206,13 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
    */
   public function setAuthConfig($config) {
     return $this->auth_config = Json::encode($config);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setAccessToken($access_token) {
+    return $this->access_token = Json::encode($access_token);
   }
 
   /**

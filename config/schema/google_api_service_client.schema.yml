@@ -11,6 +11,9 @@ google_api_client.google_api_service_client.*:
     auth_config:
       type: blob
       label: 'Credentials'
+    access_token:
+      type: blob
+      label: 'Access Token'
     services:
       type: sequence
       label: 'Services'

@@ -79,13 +79,30 @@ class GoogleApiServiceClientService {
    * @return \Google_Client
    *   Google_Client object with all params from the account.
    *
-   * @throws \Google_Exception
+   * @throws \Google_Exception|\Drupal\Core\Entity\EntityStorageException
    */
   private function getClient() {
     google_api_client_load_library();
     $client = new Google_Client();
     $client->setAuthConfig($this->googleApiServiceClient->getAuthConfig());
     $client->setScopes($this->googleApiServiceClient->getScopes(TRUE));
+    if ($access_token = $this->googleApiServiceClient->getAccessToken()) {
+      $client->setAccessToken($access_token);
+      if ($client->isAccessTokenExpired()) {
+        $access_token = $client->fetchAccessTokenWithAssertion();
+        if ($access_token) {
+          $this->googleApiServiceClient->setAccessToken($access_token);
+          $this->googleApiServiceClient->save();
+        }
+      }
+    }
+    else {
+      $access_token = $client->fetchAccessTokenWithAssertion();
+      if ($access_token) {
+        $this->googleApiServiceClient->setAccessToken($access_token);
+        $this->googleApiServiceClient->save();
+      }
+    }
     $this->googleClient = $client;
     return $client;
   }

@@ -20,6 +20,14 @@ interface GoogleApiServiceClientInterface extends ConfigEntityInterface {
   public function getAuthConfig();
 
   /**
+   * Function returns Json of access_token.
+   *
+   * @return array
+   *   Returns the access token.
+   */
+  public function getAccessToken();
+
+  /**
    * Function returns the Scopes for the account.
    *
    * @param bool $url
@@ -45,6 +53,14 @@ interface GoogleApiServiceClientInterface extends ConfigEntityInterface {
    *   Pass Json contents of the file.
    */
   public function setAuthConfig($config);
+
+  /**
+   * Function set Access Token.
+   *
+   * @param array $token
+   *   Pass array of Access Token for the account.
+   */
+  public function setAccessToken($token);
 
   /**
    * Function set Scopes.
