@@ -50,7 +50,7 @@ class GoogleApiClientRevokeForm extends ContentEntityConfirmFormBase {
     $service = \Drupal::service('google_api_client.client');
     $service->setGoogleApiClient($google_api_client);
     $service->googleClient->revokeToken();
-    $google_api_client->setAccessToken('{}');
+    $google_api_client->setAccessToken('');
     $google_api_client->setAuthenticated(FALSE);
     $google_api_client->save();
     parent::submitForm($form, $form_state);

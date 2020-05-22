@@ -162,12 +162,8 @@ class GoogleApiClientService {
       // Check if the current token is expired?
       if ($this->googleClient->isAccessTokenExpired()) {
         // Refresh the access token using refresh token if it is set.
-        if ($this->googleClient->getRefreshToken() != '') {
-          $tokenUpdated = $this->googleClient->fetchAccessTokenWithRefreshToken($this->googleClient->getRefreshToken());
-          // Now that there is a new access token in cache,
-          // set it into the client.
-          if ($tokenUpdated != FALSE) {
-            $this->googleClient->setAccessToken($tokenUpdated);
+        if ($refresh_token = $this->googleClient->getRefreshToken()) {
+          if ($tokenUpdated = $this->googleClient->fetchAccessTokenWithRefreshToken($refresh_token)) {
             $this->googleApiClient->setAccessToken($tokenUpdated);
             $this->googleApiClient->save();
             // There should be a new unexpired token.

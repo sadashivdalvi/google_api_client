@@ -8,6 +8,7 @@ use Drupal\Core\Entity\ContentEntityBase;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\google_api_client\GoogleApiClientInterface;
 use Drupal\user\UserInterface;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Defines the GoogleApiClient entity.
@@ -290,6 +291,10 @@ class GoogleApiClient extends ContentEntityBase implements GoogleApiClientInterf
    * {@inheritdoc}
    */
   public function setAccessToken($token) {
+    if (is_array($token)) {
+      $token = (object) $token;
+      $token = Json::encode($token);
+    }
     return $this->set('access_token', $token);
   }
 
@@ -571,7 +576,7 @@ class GoogleApiClient extends ContentEntityBase implements GoogleApiClientInterf
         $original->getScopes() != $this->getScopes() ||
         $original->getDeveloperKey() != $this->getDeveloperKey())) {
       // If the google_api_client isi modified it needs to be re-authenticated.
-      $this->setAccessToken('{}');
+      $this->setAccessToken('');
       $this->setAuthenticated(FALSE);
     }
     return parent::save();
