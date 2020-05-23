@@ -17,21 +17,21 @@ class GoogleApiClientRevokeForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return 'Are you sure you want to revoke access token of this account';
+    return $this->t('Are you sure you want to revoke access token of this account');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
-    return "This account can't be used for api call until authenticated again";
+    return $this->t("This account can't be used for api call until authenticated again");
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return "Revoke";
+    return $this->t("Revoke");
   }
 
   /**
@@ -53,7 +53,7 @@ class GoogleApiClientRevokeForm extends ContentEntityConfirmFormBase {
     $google_api_client->setAuthenticated(FALSE);
     $google_api_client->save();
     parent::submitForm($form, $form_state);
-    \Drupal::messenger()->addMessage('GoogleApiClient account revoked successfully');
+    \Drupal::messenger()->addMessage($this->t('GoogleApiClient account revoked successfully'));
     $this->redirect('entity.google_api_client.collection')->send();
   }
 

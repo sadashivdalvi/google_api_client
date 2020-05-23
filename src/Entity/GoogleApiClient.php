@@ -110,7 +110,7 @@ use Drupal\Component\Serialization\Json;
  * See routing file above for the corresponding implementation
  *
  * The 'GoogleApiClient' class defines methods and
- * fields for the snapshot entity.
+ * fields for the google api client entity.
  *
  * Being derived from the ContentEntityBase class, we can override the methods
  * we want. In our case we want to provide access to the standard fields about

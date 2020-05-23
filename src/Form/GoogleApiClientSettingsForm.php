@@ -52,14 +52,14 @@ class GoogleApiClientSettingsForm extends FormBase {
     $form['google_api_client_intro']['#markup'] = "GoogleApiClient tries to detect all supported services and scopes from the library installed. <br/> If you don't find your desired class/service listed or you have updated library you need to flush cache or hit 'Scan library' button, to see them here.<br/>";
     $form['submit'] = [
       '#type' => 'submit',
-      '#value' => t('Scan Library'),
+      '#value' => $this->t('Scan Library'),
     ];
 
     $names = \Drupal::config('google_api_client.google_api_services')->get('google_api_client_google_api_services');
     $form['google_api_client_services'] = [
       '#theme' => 'item_list',
       '#list_type' => 'ol',
-      '#title' => 'The supported services are:',
+      '#title' => $this->t('The supported services are:'),
       '#items' => $names,
     ];
     return $form;

@@ -48,8 +48,8 @@ class GoogleApiServiceClientDeleteForm extends EntityConfirmFormBase {
     $google_api_service_client = $this->entity;
     $google_api_service_client->delete();
     parent::submitForm($form, $form_state);
-    \Drupal::messenger()->addMessage('GoogleApiServiceClient account deleted successfully');
-    $this->redirect('entity.google_api_client.collection')-send();
+    \Drupal::messenger()->addMessage($this->t('GoogleApiServiceClient account deleted successfully'));
+    $this->redirect('entity.google_api_client.collection')->send();
   }
 
 }

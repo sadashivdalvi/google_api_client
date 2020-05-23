@@ -11,7 +11,7 @@ entity.google_api_client.canonical:
   defaults:
     # Calls the view controller, defined in the annotation of the google_api_client entity
     _entity_view: 'google_api_client'
-    _title: 'Google Api CLient Accounts'
+    _title: 'Google Api Client Accounts'
   requirements:
     _permission: 'administer google api settings'
 

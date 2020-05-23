@@ -17,21 +17,21 @@ class GoogleApiClientDeleteForm extends ContentEntityConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return 'Are you sure you want to delete this account';
+    return $this->t('Are you sure you want to delete this account');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getDescription() {
-    return "This account will be deleted from the system and won't be available";
+    return $this->t("This account will be deleted from the system and won't be available");
   }
 
   /**
    * {@inheritdoc}
    */
   public function getConfirmText() {
-    return "Delete";
+    return $this->t("Delete");
   }
 
   /**
@@ -48,7 +48,7 @@ class GoogleApiClientDeleteForm extends ContentEntityConfirmFormBase {
     $google_api_client = $this->entity;
     $google_api_client->delete();
     parent::submitForm($form, $form_state);
-    \Drupal::messenger()->addMessage('GoogleApiClient account deleted successfully');
+    \Drupal::messenger()->addMessage($this->t('GoogleApiClient account deleted successfully'));
     $this->redirect('entity.google_api_client.collection')->send();
   }
 

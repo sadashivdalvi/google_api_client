@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Google Auth Api for drupal.
+ * Google Api Client for drupal.
  */
 
 
@@ -74,13 +74,22 @@ function google_api_client_google_services_names($field, $entity, $cacheable) {
   return _google_api_client_google_services_names();
 }
 
-function _google_api_client_google_services_names($services = FALSE) {
+/**
+ * Function returns service names.
+ *
+ * @param array|string $services
+ *   Pass array of services or comma separated services.
+ *
+ * @return array|mixed|null
+ *   Returns array of names with service machine name as index.
+ */
+function _google_api_client_google_services_names($services = []) {
   $names = \Drupal::config('google_api_client.google_api_services')->get('google_api_client_google_api_services');
   if (empty($names)) {
     _google_api_client_read_scope_info();
     $names = \Drupal::config('google_api_client.google_api_services')->get('google_api_client_google_api_services');
   }
-  if (!$services) {
+  if (empty($services)) {
     asort($names);
     return $names;
   }
@@ -147,6 +156,15 @@ function google_api_client_callback_url() {
   return \Drupal\Core\Url::fromRoute('google_api_client.callback', array(), array('https' => $is_https, 'absolute' => TRUE))->toString();
 }
 
+/**
+ * Function loads the google api php client library.
+ *
+ * @param bool $return_path
+ *   Pass true if you want the path to the library.
+ *
+ * @return bool|string
+ *   Returns lib path if requested else true if loaded.
+ */
 function google_api_client_load_library($return_path = FALSE) {
   $library = \Drupal::service('library.discovery')->getLibraryByName('google_api_client', 'google-api-php-client');
   if ($library) {

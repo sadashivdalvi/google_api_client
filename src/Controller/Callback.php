@@ -90,7 +90,7 @@ class Callback extends ControllerBase {
         $google_api_client->setAuthenticated(TRUE);
         $google_api_client->save();
         unset($_SESSION['google_api_client_account_id']);
-        \Drupal::messenger()->addMessage(t('Api Account saved'));
+        \Drupal::messenger()->addMessage($this->t('Api Account saved'));
         $this->redirect('entity.google_api_client.collection')->send();
       }
       if ($this->googleApiClient->googleClient) {

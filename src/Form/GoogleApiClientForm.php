@@ -53,10 +53,10 @@ class GoogleApiClientForm extends ContentEntityForm {
 
     $entity = $this->entity;
     if ($status == SAVED_UPDATED) {
-      \Drupal::messenger()->addMessage(t('The google_api_client %feed has been updated.', ['%feed' => $entity->toLink()->toString()]));
+      \Drupal::messenger()->addMessage($this->t('The google_api_client %feed has been updated.', ['%feed' => $entity->toLink()->toString()]));
     }
     else {
-      \Drupal::messenger()->addMessage(t('The google_api_client %feed has been added. You now need to authenticate this new account.', ['%feed' => $entity->toLink()->toString()]));
+      \Drupal::messenger()->addMessage($this->t('The google_api_client %feed has been added. You now need to authenticate this new account.', ['%feed' => $entity->toLink()->toString()]));
     }
 
     $form_state->setRedirectUrl($this->entity->toUrl('collection'));
