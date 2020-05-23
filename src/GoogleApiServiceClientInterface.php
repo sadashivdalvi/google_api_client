@@ -60,7 +60,7 @@ interface GoogleApiServiceClientInterface extends ConfigEntityInterface {
    * @param array $token
    *   Pass array of Access Token for the account.
    */
-  public function setAccessToken($token);
+  public function setAccessToken(array $token);
 
   /**
    * Function set Scopes.

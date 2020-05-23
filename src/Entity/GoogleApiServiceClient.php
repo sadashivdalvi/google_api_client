@@ -211,7 +211,7 @@ class GoogleApiServiceClient extends ConfigEntityBase implements GoogleApiServic
   /**
    * {@inheritdoc}
    */
-  public function setAccessToken($access_token) {
+  public function setAccessToken(array $access_token) {
     return $this->access_token = Json::encode($access_token);
   }
 

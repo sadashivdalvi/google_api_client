@@ -3,6 +3,7 @@
 namespace Drupal\google_api_client\Service;
 
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Link;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\google_api_client\GoogleApiClientInterface;
 use Google_Client;
@@ -82,7 +83,14 @@ class GoogleApiClientService {
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
   private function getClient() {
-    google_api_client_load_library();
+    if (!google_api_client_load_library()) {
+      // We don't have library installed notify admin and abort.
+      $status_report_link = Link::createFromRoute($this->t('Status Report'), 'system.status')->toString();
+      \Drupal::messenger()->addError($this->t("Can't get the google client as library is missing check %status_report for more details. Report this to site administrator.", [
+        '%status_report' => $status_report_link,
+      ]));
+      return $this->redirect('<front>');
+    }
     $client = new Google_Client();
     $client->setRedirectUri(google_api_client_callback_url());
     if ($this->googleApiClient == NULL) {

@@ -4,6 +4,7 @@ namespace Drupal\google_api_client\Form;
 
 use Drupal\Core\Entity\ContentEntityForm;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
 
 /**
  * Form controller for the google_api_client entity edit forms.
@@ -16,6 +17,14 @@ class GoogleApiClientForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    if (!google_api_client_load_library()) {
+      // We don't have library installed notify admin and abort.
+      $status_report_link = Link::createFromRoute($this->t('Status Report'), 'system.status')->toString();
+      \Drupal::messenger()->addError($this->t('Google Api PHP Client library is not installed, please check %status_report for more details.', [
+        '%status_report' => $status_report_link,
+      ]));
+      return $this->redirect('entity.google_api_client.collection');
+    }
     /* @var $entity \Drupal\google_api_client\Entity\GoogleApiClient */
     $form = parent::buildForm($form, $form_state);
     $form['scopes']['widget']['#prefix'] = '<div id="scopes-wrapper">';

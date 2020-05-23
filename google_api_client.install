@@ -20,7 +20,7 @@ function google_api_client_requirements($phase) {
     'google-api-php-client' => [
       'title' => t('Google Api PHP Client'),
       'value' => $library_exists ? t('Installed') . ' ' . Google_Client::LIBVER : t('Not installed'),
-      'description' => $library_exists ? '' : t('Install version "@version" or latest version of the Google api php client library code (from %here) in a libraries directory such as "libraries/google-api-php-client". You can also use composer to install, read more at %documentation.  The path should be "libraries/google-api-php-client"', ['@version' => $version[0], '%here' => $url, '%documentation' => $documentation]),
+      'description' => $library_exists ? '' : t('Install version "@version" or latest version of the Google api php client library code (from %here) in a libraries directory such as "libraries/google-api-php-client". You can also use composer to install, read more at %documentation.', ['@version' => $version[0], '%here' => $url, '%documentation' => $documentation]),
       'severity' => $library_exists ? REQUIREMENT_OK : REQUIREMENT_ERROR,
     ],
   ];

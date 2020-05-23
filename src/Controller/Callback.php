@@ -3,6 +3,7 @@
 namespace Drupal\google_api_client\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Link;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\google_api_client\Service\GoogleApiClientService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -65,10 +66,13 @@ class Callback extends ControllerBase {
         $entity_type = 'google_api_client';
       }
     }
-    google_api_client_load_library();
-    if (!class_exists('Google_Client')) {
-      \Drupal::messenger()->addError(t("Can't authenticate with google as library is missing check Status report or Readme for requirements"));
-      return new RedirectResponse('/admin/config/services/google_api_client');
+    if (!google_api_client_load_library()) {
+      // We don't have library installed notify admin and abort.
+      $status_report_link = Link::createFromRoute($this->t('Status Report'), 'system.status')->toString();
+      \Drupal::messenger()->addError($this->t("Can't authenticate with google as library is missing check %status_report for more details", [
+        '%status_report' => $status_report_link,
+      ]));
+      return $this->redirect('entity.google_api_client.collection');
     }
     if ($account_id == NULL && isset($_SESSION['google_api_client_account_id'])) {
       $account_id = $_SESSION['google_api_client_account_id'];
