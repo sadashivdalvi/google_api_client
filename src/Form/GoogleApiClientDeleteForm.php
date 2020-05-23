@@ -5,7 +5,6 @@ namespace Drupal\google_api_client\Form;
 use Drupal\Core\Entity\ContentEntityConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Provides a form for deleting a google_api_client entity.
@@ -50,8 +49,7 @@ class GoogleApiClientDeleteForm extends ContentEntityConfirmFormBase {
     $google_api_client->delete();
     parent::submitForm($form, $form_state);
     \Drupal::messenger()->addMessage('GoogleApiClient account deleted successfully');
-    $response = new RedirectResponse('/admin/config/services/google_api_client');
-    $response->send();
+    $this->redirect('entity.google_api_client.collection')->send();
   }
 
 }

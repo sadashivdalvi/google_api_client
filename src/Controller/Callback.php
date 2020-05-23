@@ -7,7 +7,6 @@ use Drupal\Core\Link;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\google_api_client\Service\GoogleApiClientService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -91,9 +90,8 @@ class Callback extends ControllerBase {
         $google_api_client->setAuthenticated(TRUE);
         $google_api_client->save();
         unset($_SESSION['google_api_client_account_id']);
-        $response = new RedirectResponse('/admin/config/services/google_api_client');
         \Drupal::messenger()->addMessage(t('Api Account saved'));
-        return $response;
+        $this->redirect('entity.google_api_client.collection')->send();
       }
       if ($this->googleApiClient->googleClient) {
         $auth_url = $this->googleApiClient->googleClient->createAuthUrl();
@@ -103,8 +101,7 @@ class Callback extends ControllerBase {
     }
     // Let other modules act of google response.
     \Drupal::moduleHandler()->invokeAll('google_api_client_google_response', [$request]);
-    $response = new RedirectResponse('/admin/config/services/google_api_client');
-    return $response;
+    $this->redirect('entity.google_api_client.collection')->send();
   }
 
 }
