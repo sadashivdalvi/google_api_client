@@ -168,7 +168,7 @@ function google_api_client_callback_url() {
 function google_api_client_load_library($return_path = FALSE) {
   $library = \Drupal::service('library.discovery')->getLibraryByName('google_api_client', 'google-api-php-client');
   if ($library) {
-    if (class_exists('Google_Client')) {
+    if (class_exists('Google_Client') && file_exists('vendor/google/apiclient')) {
       // Composer install so no problem with lib.
       if ($return_path) {
         return '';
