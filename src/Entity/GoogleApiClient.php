@@ -89,7 +89,7 @@ use Drupal\Component\Serialization\Json;
  *   entity_keys = {
  *     "id" = "id",
  *     "label" = "name",
- *     "uuid" = "uid"
+ *     "owner" = "uid"
  *   },
  *   links = {
  *     "canonical" = "/google_api_client/{google_api_client}",
