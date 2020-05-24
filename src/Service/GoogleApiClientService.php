@@ -85,8 +85,8 @@ class GoogleApiClientService {
   private function getClient() {
     if (!google_api_client_load_library()) {
       // We don't have library installed notify admin and abort.
-      $status_report_link = Link::createFromRoute($this->t('Status Report'), 'system.status')->toString();
-      \Drupal::messenger()->addError($this->t("Can't get the google client as library is missing check %status_report for more details. Report this to site administrator.", [
+      $status_report_link = Link::createFromRoute(t('Status Report'), 'system.status')->toString();
+      \Drupal::messenger()->addError(t("Can't get the google client as library is missing check %status_report for more details. Report this to site administrator.", [
         '%status_report' => $status_report_link,
       ]));
       return $this->redirect('<front>');
