@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Hooks provided by the GAuth module.
+ * Hooks provided by the Google Api Client module.
  */
 
 /**
@@ -17,11 +17,14 @@
  * This is helpful when response other than authentication are received.
  * Google response have data in url so $_GET can be used in this function.
  */
-function hook_gauth_google_response() {
+function hook_google_api_client_google_response() {
   if (isset($_GET['state'])) {
-    $state = json_decode(stripslashes($_GET['state']));
-    $action = $state->action;
-    // Some other code to handle things.
+    $state = json_decode($_GET['state'], TRUE);
+    if (isset($state['src']) && in_array('my_module', $state['src'])) {
+      // Handle response only if the request was from my_module.
+      return;
+    }
+    // Changes to be made for custom module
   }
 }
 
@@ -31,12 +34,12 @@ function hook_gauth_google_response() {
  * Developers may add or remove scopes,
  * like in this example I remove the gmail metadata scope.
  */
-function hook_gauth_account_scopes_alter($scopes, $gauth_id) {
+function hook_google_api_client_account_scopes_alter($scopes, $gauth_id) {
   if ($gauth_id == 1) {
     unset($scopes['gmail']['GMAIL_METADATA']);
   }
 }
 
 /**
- * @} End of "gauth hooks".
+ * @} End of "google_api_client hooks".
  */
