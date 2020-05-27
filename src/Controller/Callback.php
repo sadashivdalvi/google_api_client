@@ -6,8 +6,11 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\google_api_client\Service\GoogleApiClientService;
+use \Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\Component\Serialization\Json;
 
 /**
  * Google Client Callback Controller.
@@ -52,6 +55,26 @@ class Callback extends ControllerBase {
    *   Return markup for the page.
    */
   public function callbackUrl(Request $request) {
+    if (isset($_GET['state'])) {
+      $state = Json::decode($_GET['state']);
+      /** We implement an additional hash check so that if the callback
+       *  is opened for public access like it will be done for google login
+       *  In that case we rely on the has for verifying that no one is hacking.
+       */
+      if ($state['hash'] != $_SESSION['google_api_client_state']['hash']) {
+        \Drupal::messenger()->addError(t('Invalid state parameter'), 'error');
+        drupal_access_denied();
+        return $this->redirect('<front>');
+      }
+      if (isset($state['src']) && !in_array('google_api_client', $state['src'])) {
+        // Handle response only if the request was from google_api_client.
+        // Here some other module has set that we don't process standard google_api_client
+        // so we invoke the webhook and return.
+        \Drupal::moduleHandler()->invokeAll('google_api_client_google_response', [$request]);
+        // we return to home page if not redirected in the webhook.
+        return $this->redirect('<front>');
+      }
+    }
     $account_id = $request->get('id');
     $entity_type = $request->get('type');
     if ($entity_type) {
@@ -63,6 +86,7 @@ class Callback extends ControllerBase {
       }
       else {
         $entity_type = 'google_api_client';
+        $_SESSION['google_api_client_account_type'] = $entity_type;
       }
     }
     if (!google_api_client_load_library()) {
@@ -86,22 +110,49 @@ class Callback extends ControllerBase {
 
       if ($request->get('code')) {
         $this->googleApiClient->googleClient->fetchAccessTokenWithAuthCode($request->get('code'));
-        $google_api_client->setAccessToken(json_encode($this->googleApiClient->googleClient->getAccessToken()));
+        $google_api_client->setAccessToken(Json::encode($this->googleApiClient->googleClient->getAccessToken()));
         $google_api_client->setAuthenticated(TRUE);
         $google_api_client->save();
+        $destination = FALSE;
+        if (isset($_SESSION['google_api_client_state']['destination'])) {
+          $destination = $_SESSION['google_api_client_state']['destination'];
+        }
+        unset($_SESSION['google_api_client_state']);
         unset($_SESSION['google_api_client_account_id']);
+        unset($_SESSION['google_api_client_account_type']);
         \Drupal::messenger()->addMessage($this->t('Api Account saved'));
-        $this->redirect('entity.google_api_client.collection')->send();
+        // Let other modules act of google response.
+        \Drupal::moduleHandler()->invokeAll('google_api_client_google_response', [$request]);
+        if ($destination) {
+          return new RedirectResponse(Url::fromUserInput($destination)->toString());
+        }
+        return $this->redirect('entity.google_api_client.collection');
       }
       if ($this->googleApiClient->googleClient) {
+        if (!isset($_SESSION['google_api_client_state'])) {
+          $state = array(
+            'src' => array('google_api_client'),
+            'hash' => md5(rand())
+          );
+          if (isset($_GET['destination'])) {
+            $state['destination'] = $_GET['destination'];
+            unset($_GET['destination']);
+          }
+        }
+        else {
+          $state = $_SESSION['google_api_client_state'];
+        }
+        // Allow other modules to alter the state param.
+        \Drupal::moduleHandler()->alter('google_api_client_state', $state, $google_api_client_id);
+        $_SESSION['google_api_client_state'] = $state;
+        $state = Json::encode($state);
+        $this->googleApiClient->googleClient->setState($state);
         $auth_url = $this->googleApiClient->googleClient->createAuthUrl();
         $response = new TrustedRedirectResponse($auth_url);
-        $response->send();
+        return $response->send();
       }
     }
-    // Let other modules act of google response.
-    \Drupal::moduleHandler()->invokeAll('google_api_client_google_response', [$request]);
-    $this->redirect('entity.google_api_client.collection')->send();
+    return $this->redirect('entity.google_api_client.collection');
   }
 
 }
