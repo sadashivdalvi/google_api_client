@@ -149,7 +149,7 @@ class Callback extends ControllerBase {
         $this->googleApiClient->googleClient->setState($state);
         $auth_url = $this->googleApiClient->googleClient->createAuthUrl();
         $response = new TrustedRedirectResponse($auth_url);
-        return $response->send();
+        $response->send();
       }
     }
     return $this->redirect('entity.google_api_client.collection');
