@@ -59,9 +59,9 @@ class Callback extends ControllerBase {
   public function callbackUrl(Request $request) {
     if (isset($_GET['state'])) {
       $state = Json::decode($_GET['state']);
-      /** We implement an additional hash check so that if the callback
-       *  is opened for public access like it will be done for google login
-       *  In that case we rely on the has for verifying that no one is hacking.
+      /* We implement an additional hash check so that if the callback
+       * is opened for public access like it will be done for google login
+       * In that case we rely on the has for verifying that no one is hacking.
        */
       if ($state['hash'] != $_SESSION['google_api_client_state']['hash']) {
         \Drupal::messenger()->addError(t('Invalid state parameter'), 'error');
@@ -70,10 +70,10 @@ class Callback extends ControllerBase {
       }
       if (isset($state['src']) && !in_array('google_api_client', $state['src'])) {
         // Handle response only if the request was from google_api_client.
-        // Here some other module has set that we don't process standard google_api_client
-        // so we invoke the webhook and return.
+        // Here some other module has set that we don't process standard
+        // google_api_client so we invoke the webhook and return.
         \Drupal::moduleHandler()->invokeAll('google_api_client_google_response', [$request]);
-        // we return to home page if not redirected in the webhook.
+        // We return to home page if not redirected in the webhook.
         return $this->redirect('<front>');
       }
     }
@@ -132,10 +132,10 @@ class Callback extends ControllerBase {
       }
       if ($this->googleApiClient->googleClient) {
         if (!isset($_SESSION['google_api_client_state'])) {
-          $state = array(
-            'src' => array('google_api_client'),
-            'hash' => md5(rand())
-          );
+          $state = [
+            'src' => ['google_api_client'],
+            'hash' => md5(rand()),
+          ];
           if (isset($_GET['destination'])) {
             $state['destination'] = $_GET['destination'];
             unset($_GET['destination']);
@@ -175,7 +175,8 @@ class Callback extends ControllerBase {
     $access = \Drupal::moduleHandler()->invokeAll('google_api_client_authenticate_account_access', [
       $account_id,
       $account_type,
-      $account]);
+      $account,
+    ]);
     // If any module returns forbidden then we don't allow authenticate.
     if (in_array(AccessResult::forbidden(), $access)) {
       return AccessResult::forbidden();
