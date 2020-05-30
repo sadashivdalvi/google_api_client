@@ -63,5 +63,45 @@ function hook_google_api_client_account_state_alter(&$state, $google_api_client_
 }
 
 /**
+ * Allows other modules to check authentication url access.
+ *
+ * Developers set limit on which roles/accounts or some other criteria
+ * who can authenticate a given account.
+ *
+ * @param $google_api_client_id
+ *   Google Api Client id (Can be a class id which extends
+ *   \Drupal\google_api_client\GoogleApiClientInterface.
+ * @param $google_api_client_type
+ *   Google Api Client type (It gives the entity_type normally it is google_api_client
+ *   but if some other module extends GoogleApiClientInterface then it can be custom type)
+ * @param \Drupal\Core\Session\AccountInterface $user_account
+ *   Run access checks for this account. Logged in user session.
+ *
+ * @return \Drupal\Core\Access\AccessResultAllowed|\Drupal\Core\Access\AccessResultForbidden|\Drupal\Core\Access\AccessResultNeutral
+ *   Should Return AccessResult::forbidden() if want to restrict authentication
+ *               AccessResult::allowed() if want to allow authentication
+ *               AccessResult::neutral() if unsure.
+ */
+function hook_google_api_client_authenticate_account_access($google_api_client_id, $google_api_client_type, $user_account) {
+  if ($google_api_client_id == 1 && $google_api_client_type == 'google_api_client') {
+    // If we want that only users with specific user id are allowed.
+    $allowed_users = [1,5,10];
+    if (in_array($user_account->id(), $allowed_users)) {
+      return \Drupal\Core\Access\AccessResult::allowed();
+    }
+    // If we want some role (say Google User role) to have access.
+    if (in_array('google_user', $user_account->getRoles())) {
+      return \Drupal\Core\Access\AccessResult::allowed();
+    }
+    // Nothing passed access check, restrict authentication.
+    return \Drupal\Core\Access\AccessResult::forbidden();
+  }
+  else {
+    // We don't want to check access of this account.
+    return \Drupal\Core\Access\AccessResult::neutral();
+  }
+}
+
+/**
  * @} End of "google_api_client hooks".
  */

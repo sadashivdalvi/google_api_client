@@ -2,15 +2,17 @@
 
 namespace Drupal\google_api_client\Controller;
 
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\google_api_client\Service\GoogleApiClientService;
-use \Drupal\Core\Url;
+use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Component\Serialization\Json;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Google Client Callback Controller.
@@ -153,6 +155,35 @@ class Callback extends ControllerBase {
       }
     }
     return $this->redirect('entity.google_api_client.collection');
+  }
+
+  /**
+   * Checks access for authenticate url.
+   *
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Run access checks for this account.
+   *
+   * @return \Drupal\Core\Access\AccessResultInterface
+   *   The access result.
+   */
+  public function authenticateAccess(AccountInterface $account) {
+    if ($account->hasPermission('administer google api settings')) {
+      return AccessResult::allowed();
+    }
+    $account_id = \Drupal::request()->get('id');
+    $account_type = \Drupal::request()->get('type', 'google_api_client');
+    $access = \Drupal::moduleHandler()->invokeAll('google_api_client_authenticate_account_access', [
+      $account_id,
+      $account_type,
+      $account]);
+    // If any module returns forbidden then we don't allow authenticate.
+    if (in_array(AccessResult::forbidden(), $access)) {
+      return AccessResult::forbidden();
+    }
+    elseif (in_array(AccessResult::allowed(), $access)) {
+      return AccessResult::allowed();
+    }
+    return AccessResult::neutral();
   }
 
 }

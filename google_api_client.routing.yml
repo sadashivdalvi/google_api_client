@@ -4,7 +4,7 @@ google_api_client.callback:
   defaults: { _controller: '\Drupal\google_api_client\Controller\Callback::callbackUrl' }
   methods:  [GET]
   requirements:
-    _permission: 'administer google api settings'
+    _custom_access: '\Drupal\google_api_client\Controller\Callback::authenticateAccess'
 
 entity.google_api_client.canonical:
   path: '/google_api_client/{google_api_client}'
