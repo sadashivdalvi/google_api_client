@@ -7,6 +7,7 @@ use Drupal\Core\Link;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\google_api_client\GoogleApiServiceClientInterface;
 use Google_Client;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class Google API Client Service.
@@ -91,7 +92,9 @@ class GoogleApiServiceClientService {
       \Drupal::messenger()->addError($this->t("Can't get the google client as library is missing check %status_report for more details. Report this to site administrator.", [
         '%status_report' => $status_report_link,
       ]));
-      return $this->redirect('<front>');
+      $response = new RedirectResponse('<front>');
+      $response->send();
+      return FALSE;
     }
     $client = new Google_Client();
     $client->setAuthConfig($this->googleApiServiceClient->getAuthConfig());
