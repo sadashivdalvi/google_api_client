@@ -3,4 +3,5 @@ description: Integrate Drupal 8 modules with Google API by using Google API PHP 
 type: module
 package: Google
 core: 8.x
+core_version_requirement: ^8 || ^9
 configure: google_api_client.settings
