@@ -77,6 +77,23 @@ class Callback extends ControllerBase {
         return $this->redirect('<front>');
       }
     }
+    if ($request->get('error')) {
+      if ($request->get('error') == 'access_denied') {
+        \Drupal::messenger()->addError($this->t('You denied access so account is not authenticated'));
+      }
+      else {
+        \Drupal::messenger()->addError($this->t('Something caused error in authentication.'));
+      }
+      unset($_SESSION['google_api_client_account_id']);
+      unset($_SESSION['google_api_client_account_type']);
+      if (isset($_SESSION['google_api_client_state']['destination'])) {
+        $destination = $_SESSION['google_api_client_state']['destination'];
+        unset($_SESSION['google_api_client_state']);
+        return new RedirectResponse(Url::fromUserInput($destination)->toString());
+      }
+      unset($_SESSION['google_api_client_state']);
+      return $this->redirect('<front>');
+    }
     $account_id = $request->get('id');
     $entity_type = $request->get('type');
     if ($entity_type) {
