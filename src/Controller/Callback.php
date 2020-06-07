@@ -59,15 +59,6 @@ class Callback extends ControllerBase {
   public function callbackUrl(Request $request) {
     if (isset($_GET['state'])) {
       $state = Json::decode($_GET['state']);
-      /* We implement an additional hash check so that if the callback
-       * is opened for public access like it will be done for google login
-       * In that case we rely on the has for verifying that no one is hacking.
-       */
-      if ($state['hash'] != $_SESSION['google_api_client_state']['hash']) {
-        \Drupal::messenger()->addError(t('Invalid state parameter'), 'error');
-        drupal_access_denied();
-        return $this->redirect('<front>');
-      }
       if (isset($state['src']) && !in_array('google_api_client', $state['src'])) {
         // Handle response only if the request was from google_api_client.
         // Here some other module has set that we don't process standard
@@ -186,6 +177,20 @@ class Callback extends ControllerBase {
   public function authenticateAccess(AccountInterface $account) {
     if ($account->hasPermission('administer google api settings')) {
       return AccessResult::allowed();
+    }
+    if (isset($_GET['state'])) {
+      $state = Json::decode($_GET['state']);
+      /* We implement an additional hash check so that if the callback
+       * is opened for public access like it will be done for google login
+       * In that case we rely on the has for verifying that no one is hacking.
+       */
+      if ($state['hash'] != $_SESSION['google_api_client_state']['hash']) {
+        \Drupal::messenger()->addError(t('Invalid state parameter'), 'error');
+        return AccessResult::forbidden();
+      }
+      else {
+        return AccessResult::allowed();
+      }
     }
     $account_id = \Drupal::request()->get('id');
     $account_type = \Drupal::request()->get('type', 'google_api_client');
