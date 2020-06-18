@@ -63,13 +63,15 @@ class GoogleApiClientService {
    *
    * @param \Drupal\google_api_client\GoogleApiClientInterface $google_api_client
    *   Pass completely loaded GoogleApiClient object.
+   * @param \Google_Client
+   *   Optionally parameter for developers who want to set initial google client object.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function setGoogleApiClient(GoogleApiClientInterface $google_api_client) {
+  public function setGoogleApiClient(GoogleApiClientInterface $google_api_client, Google_Client $googleClient = NULL) {
     $this->googleApiClient = $google_api_client;
     // Add the client.
-    $this->getClient();
+    $this->getClient($googleClient);
   }
 
   /**
@@ -78,12 +80,15 @@ class GoogleApiClientService {
    * Developers can pass the google_api_client object to setGoogleApiClient
    * and get the api client ready for operations.
    *
+   * @param \Google_Client
+   *   Optionally parameter for developers who want to set initial google client object.
+   *
    * @return \Google_Client
    *   Google_Client object with all params from the account.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  private function getClient() {
+  private function getClient($client) {
     if (!google_api_client_load_library()) {
       // We don't have library installed notify admin and abort.
       $status_report_link = Link::createFromRoute(t('Status Report'), 'system.status')->toString();
@@ -94,7 +99,9 @@ class GoogleApiClientService {
       $response->send();
       return FALSE;
     }
-    $client = new Google_Client();
+    if ($client == NULL) {
+      $client = new Google_Client();
+    }
     $client->setRedirectUri(google_api_client_callback_url());
     if ($this->googleApiClient == NULL) {
       return $client;

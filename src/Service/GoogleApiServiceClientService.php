@@ -63,13 +63,15 @@ class GoogleApiServiceClientService {
    *
    * @param \Drupal\google_api_client\GoogleApiServiceClientInterface $google_api_client
    *   Pass completely loaded GoogleApiClient object.
+   * @param \Google_Client
+   *   Optionally parameter for developers who want to set initial google client object.
    *
    * @throws \Google_Exception
    */
-  public function setGoogleApiClient(GoogleApiServiceClientInterface $google_api_client) {
+  public function setGoogleApiClient(GoogleApiServiceClientInterface $google_api_client, Google_Client $googleClient = NULL) {
     $this->googleApiServiceClient = $google_api_client;
     // Add the client.
-    $this->getClient();
+    $this->getClient($googleClient);
   }
 
   /**
@@ -78,6 +80,9 @@ class GoogleApiServiceClientService {
    * Developers can pass the google_api_client object to setGoogleApiClient
    * and get the api client ready for operations.
    *
+   * @param \Google_Client
+   *   Optionally parameter for developers who want to set initial google client object.
+   *
    * @return \Google_Client
    *   Google_Client object with all params from the account.
    *
@@ -85,7 +90,7 @@ class GoogleApiServiceClientService {
    *    Google Exception if any api function fails and
    *    EntityStorage Exception if entity save fails.
    */
-  private function getClient() {
+  private function getClient($client) {
     if (!google_api_client_load_library()) {
       // We don't have library installed notify admin and abort.
       $status_report_link = Link::createFromRoute($this->t('Status Report'), 'system.status')->toString();
@@ -96,7 +101,9 @@ class GoogleApiServiceClientService {
       $response->send();
       return FALSE;
     }
-    $client = new Google_Client();
+    if ($client == NULL) {
+      $client = new Google_Client();
+    }
     $client->setAuthConfig($this->googleApiServiceClient->getAuthConfig());
     $client->setScopes($this->googleApiServiceClient->getScopes(TRUE));
     if ($access_token = $this->googleApiServiceClient->getAccessToken()) {
